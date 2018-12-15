@@ -12,7 +12,7 @@ The model parameters are estimated by MLE via the EM algorithm
 
 Faicel Chamroukhi
 
-% Please cite the following papers for this code:
+*Please cite the following papers for this code:*
 
 
 @article{Chamroukhi-FDA-2018,

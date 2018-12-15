@@ -1,65 +1,64 @@
-function [tik, xi_ilk, alpha, beta, loglik] = forwards_backwards(prior, transmat, fik) 
-%[tik, xi_ikl, alpha, beta, loglik] = forwards_backwards(prior, transmat, fik, filter_only) 
-% forwards_backwards calcul des # probas pour un HMM avec les procèdures
-% forwards backwards.
+function [tau_tk, xi_tlk, alpha_tk, beta_tk, loglik] = forwards_backwards(prior, transmat, f_tk) 
+%[tau_tk, xi_ikl, alpha, beta, loglik] = forwards_backwards(prior, transmat, fik, filter_only) 
+% forwards_backwards : calculates the E-step of the EM algorithm for an HMM
+% (Gaussian HMM)
 
-% Entrees :
+% Inputs :
 %
 %         prior(k) = Pr(z_1 = k)
-%         transmat(\ell,k) = Pr(z_i=k | z_{i-1} = \ell)
-%         fik(i,k) = Pr(x_i | z_i=k;\theta) %gaussienne
+%         transmat(\ell,k) = Pr(z_t=k | z_{t-1} = \ell)
+%         f_tk(t,k) = Pr(y_t | z_y=k;\theta) %gaussian
 %
-% Sorties:
+% Outputs:
 %
-%        tik(i,k) = Pr(z_i=k | X) 
-%        xi_ik\elll(i,k,\ell)  = Pr(z_i=k, z_{i-1}=\ell | X) i =2,..,n
-%        avec X = (x_1,...,x_n);
+%        tau_tk(t,k) = Pr(z_t=k | X): post probs (smoothing probs)
+%        xi_tk\elll(t,k,\ell)  = Pr(z_t=k, z_{t-1}=\ell | Y) t =2,..,n
+%        with Y = (y_1,...,y_n);
+%        alpha_tk: [nxK], forwards probs: Pr(y1...yt,zt=k)
+%        beta_tk: [nxK], backwards probs: Pr(yt+1...yn|zt=k)
 %
 %
 %
-% 
+% Faicel Chamroukhi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% fik = fik';
 
-T = size(fik, 1);
+[T, K] = size(f_tk);
 
 if nargin < 6, filter_only = 0; end
 
-K = length(prior);
 scale = ones(1,T);%pour que loglik = sum(log(scale)) part de zero
 
 prior = prior(:); 
-tik = zeros(T,K);
-xi_ilk = zeros(T-1,K,K);
-alpha = zeros(T,K);
-beta = zeros(T,K);
+tau_tk = zeros(T,K);
+xi_tlk = zeros(T-1,K,K);
+alpha_tk = zeros(T,K);
+beta_tk = zeros(T,K);
 
-%% calcul des alphaik et tik (et xiikl)
+%% forwards: calculation of alpha_tk
 t = 1;
-alpha(1,:) = prior' .* fik(t,:);
-[alpha(t,:), scale(t)] = normalise(alpha(t,:));
-
+alpha_tk(1,:) = prior' .* f_tk(t,:);
+[alpha_tk(t,:), scale(t)] = normalise(alpha_tk(t,:));
 for t=2:T
-    [alpha(t,:), scale(t)] = normalise((alpha(t-1,:)*transmat) .* fik(t,:));
+    [alpha_tk(t,:), scale(t)] = normalise((alpha_tk(t-1,:)*transmat) .* f_tk(t,:));
     %filtered_prob (t-1,:,:)= normalise((alpha(:,t-1) * fik(:,t)') .*transmat);
 end
-%%loglik (technique du scaling)
+%%loglikehood (with the scaling technique) (see Rabiner's paper/book)
 loglik = sum(log(scale));
 
 if filter_only
-  beta = [];
-  xi_ilk = alpha;
+  beta_tk = [];
+  xi_tlk = alpha_tk;
   return;
 end
-%% calcul des betaik et tik (et xiikl)
+%% backwards: calculation of beta_tk, tau_tk (and xi_tkl)
 %t=T;
-beta(T,:) = ones(1,K);
-tik(T,:) = normalise(alpha(T,:) .* beta(T,:));
+beta_tk(T,:) = ones(1,K);
+tau_tk(T,:) = normalise(alpha_tk(T,:) .* beta_tk(T,:));
 for t=T-1:-1:1
-    beta(t,:) =  normalise(  transmat * (beta(t+1,:) .* fik(t+1,:))' );
+    beta_tk(t,:) =  normalise(  transmat * (beta_tk(t+1,:) .* f_tk(t+1,:))' );
     % transmat * (beta(t+1,:) .* fik(t+1,:))' /scale(t); 
-    tik(t,:) = normalise(alpha(t,:) .* beta(t,:));
-    xi_ilk(t,:,:) = normalise((transmat .* (alpha(t,:)' * (beta(t+1,:) .* fik(t+1,:))))); 
+    tau_tk(t,:) = normalise(alpha_tk(t,:) .* beta_tk(t,:));
+    xi_tlk(t,:,:) = normalise((transmat .* (alpha_tk(t,:)' * (beta_tk(t+1,:) .* f_tk(t+1,:))))); 
 end
 
 

@@ -1,36 +1,118 @@
 function hmmr = learn_hmmr(x, y, K, p,...
     type_variance, total_EM_tries, max_iter_EM, threshold, verbose)
 
-% learn_hmmr estime les parametres du modele de regression a
-% processus markovien caché. à chaque instant t , z_t est l'etat (classe)
-% cache(e) et y(t) est l'observation.
+% learn_hmmr learn a Regression model with a Hidden Markov Process (HMMR)
+% for modeling and segmentation of a time series with regime changes.
+% The learning is performed by the EM (Baum-Welch) algorithm.
 %
 %
-% Entrees :
+% Inputs :
 %
-%          y(t) : observation à l'instant t (dans x)
+%          (x,y) : a time series composed of m points : dim(y)=[m 1]
+%                * Each curve is observed during the interval [0,T], i.e x =[t_1,...,t_m]
 %
-% Sorties :
+%           K : Number of polynomial regression components (regimes)
+%          	p : degree of the polynomials
 %
-%         hmmr: structure qui contient les champs suivants:
-
-%         prior: [Kx1]: prior(k ) = Pr(z_1=k), k=1...K
-%         trans_mat: [KxK], trans_mat(\ell,k) = Pr(z_t = k|z_{t-1})
-%         reg_param: structure contenant essentiellement les
-%         champs:
-%                 betak: coeffs de regression
-%                 sigma2k (ou sigma2) : variances
-%        Stats:
-%         tau_tk: [nxK], probas à posteriori des etats tau_tk(t,k) = Pr(z_i=k | Y)
-%         alpha_tk: [nxK], probas forwards
-%         beta_tk: [nxK], probas backwards
-%         xi_tkl: [(n-1)xKxK], probas jointes : xi_tk\elll(t,k,\ell)  = Pr(z_t=k, z_{t-1}=\ell | Y) t =2,..,n
-%         X: [nx(p+1)] où p est l'ordre de la régression polynomiale
-%         etc
+% Outputs :
 %
-%Faicel Chamroukhi, sept 2008 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%         hmmr: the estimated HMMR model. a structure composed of:
+%
+%         prior: [Kx1]: prior(k) = Pr(z_1=k), k=1...K
+%         trans_mat: [KxK], trans_mat(\ell,k) = Pr(z_t = k|z_{t-1}=\ell)
+%         reg_param: the paramters of the regressors:
+%                 betak: regression coefficients
+%                 sigma2k (or sigma2) : the variance(s)
+%         Stats:
+%           tau_tk: smoothing probs: [nxK], tau_tk(t,k) = Pr(z_i=k | y1...yn)
+%           alpha_tk: [nxK], forwards probs: Pr(y1...yt,zt=k)
+%           beta_tk: [nxK], backwards probs: Pr(yt+1...yn|zt=k)
+%           xi_tkl: [(n-1)xKxK], joint post probs : xi_tk\elll(t,k,\ell)  = Pr(z_t=k, z_{t-1}=\ell | Y) t =2,..,n
+%           X: [nx(p+1)] regression design matrix
+%           nu: model complexity
+%           parameter_vector
+%           f_tk: [nxK] f(yt|zt=k)
+%           log_f_tk: [nxK] log(f(yt|zt=k))
+%           loglik: log-likelihood at convergence
+%           stored_loglik: stored log-likelihood values during EM
+%           cputime: for the best run
+%           cputime_total: for all the EM runs
+%           klas: [nx1 double]
+%           Zik: [nxK]
+%           state_probs: [nxK]
+%           BIC: -2.1416e+03
+%           AIC: -2.0355e+03
+%           regressors: [nxK]
+%           predict_prob: [nxK]: Pr(zt=k|y1...y_{t-1})
+%           predicted: [nx1]
+%           filter_prob: [nxK]: Pr(zt=k|y1...y_t)
+%           filtered: [nx1]
+%           smoothed_regressors: [nxK]
+%           smoothed: [nx1]
+%
+%
+%Faicel Chamroukhi, sept 2008 
+%
+%% Please cite the following papers for this code:
+%
+% 
+% @article{Chamroukhi-FDA-2018,
+% 	Journal = {Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery},
+% 	Author = {Faicel Chamroukhi and Hien D. Nguyen},
+% 	Note = {DOI: 10.1002/widm.1298.},
+% 	Volume = {},
+% 	Title = {Model-Based Clustering and Classification of Functional Data},
+% 	Year = {2019},
+% 	Month = {to appear},
+% 	url =  {https://chamroukhi.com/papers/MBCC-FDA.pdf}
+% 	}
+% 
+% @InProceedings{Chamroukhi-IJCNN-2011,
+%   author = {F. Chamroukhi and A. Sam\'e  and P. Aknin and G. Govaert},
+%   title = {Model-based clustering with Hidden Markov Model regression for time series with regime changes},
+%   Booktitle = {Proceedings of the International Joint Conference on Neural Networks (IJCNN), IEEE},
+%   Pages = {2814--2821},
+%   Adress = {San Jose, California, USA},
+%   year = {2011},
+%   month = {Jul-Aug},
+%   url = {https://chamroukhi.com/papers/Chamroukhi-ijcnn-2011.pdf}
+% }
+% 
+% @INPROCEEDINGS{Chamroukhi-IJCNN-2009,
+%   AUTHOR =       {Chamroukhi, F. and Sam\'e,  A. and Govaert, G. and Aknin, P.},
+%   TITLE =        {A regression model with a hidden logistic process for feature extraction from time series},
+%   BOOKTITLE =    {International Joint Conference on Neural Networks (IJCNN)},
+%   YEAR =         {2009},
+%   month = {June},
+%   pages = {489--496},
+%   Address = {Atlanta, GA},
+%  url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf},
+%  slides = {./conf-presentations/presentation_IJCNN2009}
+% }
+% 
+% @article{chamroukhi_et_al_NN2009,
+% 	Address = {Oxford, UK, UK},
+% 	Author = {Chamroukhi, F. and Sam\'{e}, A. and Govaert, G. and Aknin, P.},
+% 	Date-Added = {2014-10-22 20:08:41 +0000},
+% 	Date-Modified = {2014-10-22 20:08:41 +0000},
+% 	Journal = {Neural Networks},
+% 	Number = {5-6},
+% 	Pages = {593--602},
+% 	Publisher = {Elsevier Science Ltd.},
+% 	Title = {Time series modeling by a regression approach based on a latent process},
+% 	Volume = {22},
+% 	Year = {2009},
+% 	url  = {https://chamroukhi.users.lmno.cnrs.fr/papers/Chamroukhi_Neural_Networks_2009.pdf}
+% 	}
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 warning off
 
+if nargin<9 verbose =0; end
+if nargin<8 threshold = 1e-6; end
+if nargin<7 max_iter_EM = 1500;end
+if nargin<6 total_EM_tries = 1;end
+if nargin<5 total_EM_tries = 1;type_variance='hetereskedastic';end
 switch type_variance
     case 'homoskedastic'
         homoskedastic =1;
@@ -39,13 +121,6 @@ switch type_variance
     otherwise
         error('The type of the model variance should be : ''homoskedastic'' ou ''hetereskedastic''');
 end
-
-if nargin<9 verbose =0; end
-if nargin<8 threshold = 1e-6; end
-if nargin<7 max_iter_EM = 1500;end
-if nargin<6 total_EM_tries = 1;end
-
-
 
 if size(y,2)~=1, y=y'; end %
 
@@ -141,7 +216,7 @@ while (nb_good_try < total_EM_tries)
             % variance(s)
             z = sqrt(wieghts).*(y-X*bk);
             sk = z'*z;
-            if homoskedastic, sigma2 = (s+sk)/m;else; sigma2k(k) = sk/nk + lambda;end
+            if homoskedastic, s = (s+sk); sigma2 = s/m;else; sigma2k(k) = sk/nk;end
         end
         
         %% En of an EM iteration

@@ -1,6 +1,6 @@
-function [X] = designmatrix(x,p)
-%function [X] = designmatrix(x,p)
-% constructs the desing matrix of a polynomial regression with degree p
+function X = designmatrix(x,p)
+% function X = designmatrix(x,p)
+% constructs the design matrix of a polynomial regression of degree p
 %
 %
 % Faicel Chamroukhi

@@ -63,7 +63,6 @@ ylabel('Prob');%Post Probs: Pr(Z_{t}=k|y_1,\ldots,y_t)
 
 
 %% data, regressors, and segmentation
-
 scrsz = get(0,'ScreenSize');
 figr = figure('Position',[scrsz(4)/2.5 scrsz(4)/2 560 scrsz(4)/1.4]);
 axes1 = axes('Parent',figr,'Position',[0.1 0.45 0.8 0.48],'FontSize',14);

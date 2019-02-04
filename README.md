@@ -14,7 +14,7 @@ Faicel Chamroukhi
 
 *Please cite the following papers for this code:*
 
-
+```
 @article{Chamroukhi-FDA-2018,
 	Journal = {Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery},
 	Author = {Faicel Chamroukhi and Hien D. Nguyen},
@@ -45,8 +45,7 @@ Faicel Chamroukhi
   month = {June},
   pages = {489--496},
   Address = {Atlanta, GA},
- url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf},
- slides = {./conf-presentations/presentation_IJCNN2009}
+ url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf}
 }
 
 @article{chamroukhi_et_al_NN2009,
@@ -61,11 +60,10 @@ Faicel Chamroukhi
 	Title = {Time series modeling by a regression approach based on a latent process},
 	Volume = {22},
 	Year = {2009},
-	url  = {https://chamroukhi.users.lmno.cnrs.fr/papers/Chamroukhi_Neural_Networks_2009.pdf}
+	url  = {https://chamroukhi.com/papers/Chamroukhi_Neural_Networks_2009.pdf}
 	}
-
+```
 
 
 
 Faicel Chamroukhi Septembre 2008.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

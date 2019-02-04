@@ -86,8 +86,7 @@ function hmmr = learn_hmmr(x, y, K, p,...
 %   month = {June},
 %   pages = {489--496},
 %   Address = {Atlanta, GA},
-%  url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf},
-%  slides = {./conf-presentations/presentation_IJCNN2009}
+%  url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf}
 % }
 % 
 % @article{chamroukhi_et_al_NN2009,
@@ -102,7 +101,7 @@ function hmmr = learn_hmmr(x, y, K, p,...
 % 	Title = {Time series modeling by a regression approach based on a latent process},
 % 	Volume = {22},
 % 	Year = {2009},
-% 	url  = {https://chamroukhi.users.lmno.cnrs.fr/papers/Chamroukhi_Neural_Networks_2009.pdf}
+% 	url  = {https://chamroukhi.com/papers/Chamroukhi_Neural_Networks_2009.pdf}
 % 	}
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -167,7 +166,6 @@ while (nb_good_try < total_EM_tries)
     
     %
     log_f_tk = zeros(m,K);
-    muk = zeros(m, K);
     %
     %% EM
     while ((iter <= max_iter_EM) && ~converged)
@@ -177,10 +175,9 @@ while (nb_good_try < total_EM_tries)
         
         % observation likelihoods
         for k=1:K
-            mk = X*betak(:,k);
-            muk(:,k) = mk; % the regressors means
+            muk = X*betak(:,k);% the regressors means
             if homoskedastic; sk = sigma2 ;  else; sk = sigma2k(k);end
-            z=((y - mk).^2)/sk;
+            z=((y - muk).^2)/sk;
             log_f_tk(:,k) =  -0.5*ones(m,1).*(log(2*pi)+log(sk)) - 0.5*z;%log(gaussienne)
         end
         

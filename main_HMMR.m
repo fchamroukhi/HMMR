@@ -43,8 +43,7 @@
 %   month = {June},
 %   pages = {489--496},
 %   Address = {Atlanta, GA},
-%  url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf},
-%  slides = {./conf-presentations/presentation_IJCNN2009}
+%  url = {https://chamroukhi.com/papers/chamroukhi_ijcnn2009.pdf}
 % }
 % 
 % @article{chamroukhi_et_al_NN2009,
@@ -59,7 +58,7 @@
 % 	Title = {Time series modeling by a regression approach based on a latent process},
 % 	Volume = {22},
 % 	Year = {2009},
-% 	url  = {https://chamroukhi.users.lmno.cnrs.fr/papers/Chamroukhi_Neural_Networks_2009.pdf}
+% 	url  = {https://chamroukhi.com/papers/Chamroukhi_Neural_Networks_2009.pdf}
 % 	}
 % 
 % 

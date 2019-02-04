@@ -7,6 +7,7 @@ function hmmr =  init_hmmr(X, y, K, type_variance, EM_try)
 % Inputs :
 %
 %           X: [nx(p+1)] regression desing matrix
+%           y: [nx1] time series
 %           K : Number of polynomial regression components (regimes)
 %          	type_variance: hoskedastoc or heteroskedastic
 %           EM_try: number of the current EM run
@@ -21,7 +22,8 @@ function hmmr =  init_hmmr(X, y, K, type_variance, EM_try)
 %                 betak: regression coefficients
 %                 sigma2k (or sigma2) : the variance(s). sigma2k(k) = variance of y(t) given z(t)=k; sigma2k(k) =
 %         sigma^2_k.
-%         and some stats: like the Mask for a segmental model
+%         and some stats: like the the posterior probs, the loglikelihood,
+%         etc
 %
 %
 % Faicel Chamroukhi, first version in November 2008
@@ -46,18 +48,14 @@ hmmr.trans_mat = Mask;
 hmmr.prior = [1;zeros(K-1,1)];
 hmmr.stats.Mask = Mask;
 %  Initialisation des coeffecients de regression et des variances.
-hmmr_reg = init_hmmr_regressors(X, y, K, type_variance, EM_try);
+hmmr_reg = init_hmmr_regressors(X, y, K, homoskedastic, EM_try);
 
 hmmr.reg_param = hmmr_reg;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function hmmr_reg_param = init_hmmr_regressors(X, y, K, type_variance, EM_try)
+function hmmr_reg_param = init_hmmr_regressors(X, y, K, homoskedastic, EM_try)
 
-if strcmp(type_variance,'homoskedastic')
-    homoskedastic = 1;
-else
-    homoskedastic = 0;
-end
+
 [m, P] = size(X);
 %m = length(y);
 
